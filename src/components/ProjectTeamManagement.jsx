@@ -5,7 +5,8 @@ import axios from 'axios';
 // Import the AssignTeamMemberModal component
 import AssignTeamMemberModal from './AssignTeamMemberModal';
 
-const ProjectTeamManagement = () => {
+const ProjectTeamManagement = ({ projectId, onClose }) => {
+    console.log(projectId)
     const [teamMembers, setTeamMembers] = useState([
 
     ]);
@@ -16,13 +17,14 @@ const ProjectTeamManagement = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const fetchTeammates = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/4`)
-            setTeamMembers(res.data)
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`)
             console.log(res.data)
+            setTeamMembers(res.data)
         } catch (error) {
             console.log({ message: error })
         }
     }
+    console.log(teamMembers)
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -131,7 +133,7 @@ const ProjectTeamManagement = () => {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <div className='flex items-center'>
-                    <div className="bg-blue-500 text-white p-2 rounded-full mr-2">
+                    <div onClick={onClose} className="bg-blue-500 text-white p-2 rounded-full mr-2">
                         <FiChevronLeft />
                     </div>
                     <h1 className="text-blue-800 text-lg font-bold">Manage Projects</h1>
