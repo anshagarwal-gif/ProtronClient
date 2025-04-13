@@ -16,7 +16,7 @@ const AppLayout = () => {
             case 'dashboard':
                 return <Dashboard />;
             case 'projects':
-                return <ManageProjects />;
+                return <ProjectTeamManagement />;
             case 'team':
                 return <TeamManagement />;
             case 'timesheet':

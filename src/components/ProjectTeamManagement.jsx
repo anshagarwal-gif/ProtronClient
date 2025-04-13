@@ -16,7 +16,7 @@ const ProjectTeamManagement = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const fetchTeammates = async()=>{
         try {
-            const res = await axios.get("http://localhost:8282/api/project-team/list/1")
+            const res = await axios.get("http://localhost:8282/api/project-team/list/4")
             setTeamMembers(res.data)
             console.log(res.data)
         } catch (error) {
