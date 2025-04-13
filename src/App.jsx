@@ -3,6 +3,9 @@ import "./App.css"
 import Sidebar from './components/sidebar';
 import ProjectTeamManagement from './components/ProjectTeamManagement';
 import TeamManagement from './components/TeamManagement';
+import ProjectManagement from './components/ProjectManagement';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 const Dashboard = () => <div>Dashboard Content</div>;
 const ManageProjects = () => <div>Manage Projects Content</div>;
 const ManageTimesheet = () => <div>Manage Timesheet Content</div>;
@@ -16,7 +19,8 @@ const AppLayout = () => {
             case 'dashboard':
                 return <Dashboard />;
             case 'projects':
-                return <ProjectTeamManagement />;
+                // return <ProjectTeamManagement />;
+                return <ProjectManagement />;
             case 'team':
                 return <TeamManagement />;
             case 'timesheet':
@@ -29,10 +33,12 @@ const AppLayout = () => {
     };
 
     return (
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
         <div className="flex">
             <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
             <div className="flex-1 p-6 overflow-y-auto">{renderContent()}</div>
         </div>
+        </LocalizationProvider>
     );
 };
 

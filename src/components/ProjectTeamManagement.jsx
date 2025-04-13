@@ -5,95 +5,123 @@ import axios from 'axios';
 // Import the AssignTeamMemberModal component
 import AssignTeamMemberModal from './AssignTeamMemberModal';
 
-const ProjectTeamManagement = () => {
+const ProjectTeamManagement = ({ projectId, onClose }) => {
+    console.log(projectId)
     const [teamMembers, setTeamMembers] = useState([
-        
+
     ]);
-    
+    const [users, setUsers] = useState([]);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [actionsOpen, setActionsOpen] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const fetchTeammates = async()=>{
+    const fetchTeammates = async () => {
         try {
-            const res = await axios.get("http://localhost:8282/api/project-team/list/4")
-            setTeamMembers(res.data)
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`)
             console.log(res.data)
+            setTeamMembers(res.data)
         } catch (error) {
-            console.log({message:error})
+            console.log({ message: error })
         }
     }
-    useEffect(()=>{
+    console.log(teamMembers)
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`)
+                setUsers(res.data)
+                console.log(res.data)
+            } catch (error) {
+                console.log({ message: error })
+            }
+        }
+
+        fetchUsers()
+    }, [])
+
+    useEffect(() => {
         fetchTeammates()
-    },[])
+    }, [])
     const toggleActions = (id) => {
-        setActionsOpen(prev => ({
+        setActionsOpen((prev) => ({
             ...prev,
-            [id]: !prev[id]
+            [id]: !prev[id], // Toggle only the specific row
         }));
     };
 
     const handleStatusChange = async (id, newStatus) => {
+        setActionsOpen(!actionsOpen[id]);
         console.log("handle Status Change function is called")
         try {
             // Call backend to update status
-            await axios.patch(`http://localhost:8282/api/project-team/${id}/status`, null, {
+            await axios.patch(`${import.meta.env.VITE_API_URL}/api/project-team/${id}/status`, null, {
                 params: { status: newStatus }
             });
-    
+
             // Refetch updated team members from backend
-            const response = await axios.get(`http://localhost:8080/api/project-team/list/${projectId}`); // adjust endpoint as needed
-            setTeamMembers(response.data);
-    
-            // Close actions dropdown
-            setActionsOpen(prev => ({
-                ...prev,
-                [id]: false
-            }));
+            setTeamMembers((prevMembers) => prevMembers.map((member) => {
+                if (member.projectTeamId === id) {
+                    return { ...member, status: newStatus };
+                }
+                return member;
+            }
+            ));
         } catch (error) {
+            alert("Failed to update status:", error);
             console.error("Failed to update status:", error);
-        }}
+        }
+    }
 
     const handleRemoveMember = async (id) => {
+        setActionsOpen(!actionsOpen[id]);
         console.log("remove function is called")
         try {
-            const response = await axios.delete(`http://localhost:8282/api/project-team/delete/${id}`);
+            const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/project-team/delete/${id}`);
             console.log("Deleted successfully:", response.data);
+
+            setTeamMembers((prevMembers) => prevMembers.filter((member) => member.projectTeamId !== id));
+
         } catch (error) {
+            alert("Failed to update status:", error);
             console.error("Failed to delete:", error);
         }
     };
-    
+
 
     const handleAddMember = async (memberData, projectId) => {
         console.log("handleAddMember is called")
         try {
+
+            const selectedUser = users.find(user => user.email === memberData.email);
+
             const requestBody = {
-                name: memberData.name,
-                employeeCode: memberData.employeeCode,
-                email: memberData.email,
-                cost: memberData.cost,
+                empCode: memberData.employeeCode,
+                userId: selectedUser.userId,
+                pricing: memberData.cost,
+                status: "active",
+                projectId: 4,
+                taskType: memberData.tasktype,
                 unit: memberData.unit,
-                projectId: 1, // Include this if needed by your DTO
+                estimatedReleaseDate: memberData.releaseDate,
             };
-    
-            // 1. Call backend to add new member
-            await axios.post(`http://localhost:8282/api/project-team/add`, requestBody);
-    
+            console.log("Request Body:", requestBody);
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/project-team/add`, requestBody);
+
             // 2. Refetch the updated team list
-            const response = await axios.get(`http://localhost:8282/api/project-team/list/${projectId}`);
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/4`);
             setTeamMembers(response.data);
         } catch (error) {
+            alert("Failed to add member:", error);
             console.error("Failed to add member:", error);
         }
     };
-    
+
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'Active':
+            case 'active':
                 return 'text-green-500';
-            case 'On Hold':
+            case 'hold':
                 return 'text-yellow-500';
             default:
                 return 'text-gray-500';
@@ -105,7 +133,7 @@ const ProjectTeamManagement = () => {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <div className='flex items-center'>
-                    <div className="bg-blue-500 text-white p-2 rounded-full mr-2">
+                    <div onClick={onClose} className="bg-blue-500 text-white p-2 rounded-full mr-2">
                         <FiChevronLeft />
                     </div>
                     <h1 className="text-blue-800 text-lg font-bold">Manage Projects</h1>
@@ -136,7 +164,7 @@ const ProjectTeamManagement = () => {
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="font-bold text-gray-800">Manage Team Member</h2>
                     <div className="flex items-center">
-                        <button 
+                        <button
                             className="bg-orange-500 text-white px-3 py-2 rounded flex items-center text-sm"
                             onClick={() => setIsModalOpen(true)}
                         >
@@ -156,25 +184,37 @@ const ProjectTeamManagement = () => {
                                 <th className="py-3 px-4 text-sm font-medium text-gray-600">Emp-Code</th>
                                 <th className="py-3 px-4 text-sm font-medium text-gray-600">Email</th>
                                 <th className="py-3 px-4 text-sm font-medium text-gray-600">Cost</th>
-                                <th className="py-3 px-4 text-sm font-medium text-gray-600">DOJ</th>
+                                <th className="py-3 px-4 text-sm font-medium text-gray-600">Est.Release</th>
                                 <th className="py-3 px-4 text-sm font-medium text-gray-600">Status</th>
                                 <th className="py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {teamMembers.map((member, index) => (
-                                <tr key={member.id} className="border-t">
-                                    <td className="py-3 px-4">{member.id}</td>
+                                <tr key={index} className="border-t">
+                                    <td className="py-3 px-4">{index + 1}</td>
                                     <td className="py-3 px-4 flex items-center">
-                                        <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full mr-2" />
-                                        <span>
-                                            {member.name}
-                                        </span>
+                                        {member.user.profilePhoto ? (
+                                            <img
+                                                src={member.user.profilePhoto}
+                                                alt={member.user.firstName + member.user.lastName}
+                                                className="w-8 h-8 rounded-full mr-2"
+                                            />
+                                        ) : (
+                                            <img
+                                                src={"/profilepic.jpg"}
+                                                alt="userprofile"
+                                                className="w-8 h-8 rounded-full mr-2"
+                                            />
+                                        )}
+                                        <span>{member.user.firstName + member.user.lastName}</span>
                                     </td>
                                     <td className="py-3 px-4">{member.empCode}</td>
-                                    <td className="py-3 px-4">{member.email}</td>
-                                    <td className="py-3 px-4">{member.cost}</td>
-                                    <td className="py-3 px-4">{member.doj}</td>
+                                    <td className="py-3 px-4">{member.user.email}</td>
+                                    <td className="py-3 px-4">
+                                        {member.unit === "Rupees" ? "₹" : member.unit === "Dollar" ? "$" : ""} {member.pricing}
+                                    </td>
+                                    <td className="py-3 px-4">{member.estimatedReleaseDate}</td>
                                     <td className="py-3 px-4">
                                         <span className={`${getStatusColor(member.status)}`}>
                                             {member.status}
@@ -182,23 +222,28 @@ const ProjectTeamManagement = () => {
                                     </td>
                                     <td className="py-3 px-4 relative">
                                         <button
-                                            onClick={() => toggleActions(member.id)}
+                                            onClick={() => toggleActions(member.projectTeamId)}
                                             className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm flex items-center"
                                         >
                                             Actions
                                             <FiChevronDown size={14} className="ml-1" />
                                         </button>
 
-                                        {actionsOpen[member.id] && (
+                                        {actionsOpen[member.projectTeamId] && (
                                             <div className="absolute right-4 mt-1 bg-white shadow-lg border rounded z-10 w-32">
                                                 <button
-                                                    onClick={() => handleStatusChange(member.id, member.status === 'On Hold' ? 'Active' : 'On Hold')}
+                                                    onClick={() =>
+                                                        handleStatusChange(
+                                                            member.projectTeamId,
+                                                            member.status === "hold" ? "active" : "hold"
+                                                        )
+                                                    }
                                                     className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                                                 >
-                                                    {member.status === 'On Hold' ? 'Activate' : 'Hold'}
+                                                    {member.status === "hold" ? "Activate" : "Hold"}
                                                 </button>
                                                 <button
-                                                    onClick={() => handleRemoveMember(member.id)}
+                                                    onClick={() => handleRemoveMember(member.projectTeamId)}
                                                     className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 text-sm"
                                                 >
                                                     Remove
@@ -250,6 +295,7 @@ const ProjectTeamManagement = () => {
                 onClose={() => setIsModalOpen(false)}
                 projectName="Project Name"
                 onAddMember={handleAddMember}
+                users={users} // Pass the users data to the modal
             />
         </div>
     );
