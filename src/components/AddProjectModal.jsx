@@ -376,6 +376,19 @@ const AddProjectModal = ({ open, onClose, onSubmit, formData, setFormData }) => 
                             }}
                         />
                     </Grid>
+                    <Grid item xs={12} sm={6}>
+  <TextField
+    fullWidth
+    label="Sponsor Name"
+    placeholder="Enter sponsor or tenent"
+    value={formData.tenent}
+    onChange={(e) =>
+      setFormData((prev) => ({ ...prev, tenent: e.target.value }))
+    }
+    variant="outlined"
+  />
+</Grid>
+
                     <Grid item xs={12} sm={4}>
                         <Button
                             onClick={handleSubmit}
