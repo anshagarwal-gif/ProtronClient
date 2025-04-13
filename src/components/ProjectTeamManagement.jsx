@@ -88,7 +88,7 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
     };
 
 
-    const handleAddMember = async (memberData, projectId) => {
+    const handleAddMember = async (memberData) => {
         console.log("handleAddMember is called")
         try {
 
@@ -99,7 +99,7 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
                 userId: selectedUser.userId,
                 pricing: memberData.cost,
                 status: "active",
-                projectId: 4,
+                projectId: projectId,
                 taskType: memberData.tasktype,
                 unit: memberData.unit,
                 estimatedReleaseDate: memberData.releaseDate,
@@ -108,7 +108,7 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
             await axios.post(`${import.meta.env.VITE_API_URL}/api/project-team/add`, requestBody);
 
             // 2. Refetch the updated team list
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/4`);
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`);
             setTeamMembers(response.data);
         } catch (error) {
             alert("Failed to add member:", error);
