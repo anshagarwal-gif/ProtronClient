@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import axios from "axios"
-import { AiFillProject, AiOutlineSearch } from "react-icons/ai"
+import { AiFillProject, AiOutlineSearch, AiOutlineCalendar } from "react-icons/ai"
 import AddProjectModal from "./AddProjectModal" // Adjust path if needed
 import GlobalSnackbar from './GlobalSnackbar';
 import ProjectTeamManagement from "./ProjectTeamManagement";
@@ -14,6 +14,8 @@ const ProjectManagement = () => {
     const [showTeamManagement, setShowTeamManagement] = useState(false);
     const [selectedProjectId, setSelectedProjectId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [groupByDate, setGroupByDate] = useState(true);
+    const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
     
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -39,29 +41,49 @@ const ProjectManagement = () => {
     const fetchProjects = async () => {
         try {
             const res = await axios.get(`${API_BASE_URL}/api/projects`);
-            setProjects(res.data);
-            setFilteredProjects(res.data);
+            const sortedProjects = sortProjects(res.data, sortOrder);
+            setProjects(sortedProjects);
+            setFilteredProjects(sortedProjects);
         } catch (error) {
             console.log({ message: error });
         }
+    };
+
+    // Function to sort projects by date
+    const sortProjects = (projectsToSort, order = 'asc') => {
+        return [...projectsToSort].sort((a, b) => {
+            const dateA = new Date(a.startDate);
+            const dateB = new Date(b.startDate);
+            return order === 'asc' ? dateA - dateB : dateB - dateA;
+        });
     };
 
     useEffect(() => {
         fetchProjects();
     }, []);
 
-    // Effect for filtering projects based on search term
+    // Effect for sorting and filtering projects
     useEffect(() => {
-        if (searchTerm.trim() === '') {
-            setFilteredProjects(projects);
-        } else {
-            const filtered = projects.filter(project => 
+        let filtered = [...projects];
+        
+        // Apply search filter
+        if (searchTerm.trim() !== '') {
+            filtered = filtered.filter(project => 
                 project.projectName.toLowerCase().includes(searchTerm.toLowerCase())
             );
-            setFilteredProjects(filtered);
         }
+        
+        // Apply sorting
+        filtered = sortProjects(filtered, sortOrder);
+        
+        setFilteredProjects(filtered);
         setCurrentPage(1); // Reset to first page when filtering
-    }, [searchTerm, projects]);
+    }, [searchTerm, projects, sortOrder]);
+
+    const handleToggleSortOrder = () => {
+        const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+        setSortOrder(newOrder);
+    };
 
     const handleManageTeam = (projectId) => {
         setSelectedProjectId(projectId);
@@ -113,7 +135,7 @@ const ProjectManagement = () => {
             const response = await axios.post(`${API_BASE_URL}/api/projects/add`, payload);
             console.log('Project added successfully:', response.data);
 
-          await fetchProjects();
+            await fetchProjects();
             // Reset form
             setFormData({
                 projectName: '',
@@ -163,16 +185,45 @@ const ProjectManagement = () => {
         setSearchTerm(e.target.value);
     };
 
+    // Group projects by date
+    const groupProjectsByDate = (projects) => {
+        if (!groupByDate) {
+            return { "All Projects": projects };
+        }
+        
+        const grouped = {};
+        projects.forEach(project => {
+            const date = new Date(project.startDate).toLocaleDateString();
+            if (!grouped[date]) {
+                grouped[date] = [];
+            }
+            grouped[date].push(project);
+        });
+        return grouped;
+    };
+
     // Get current projects for pagination
     const indexOfLastProject = currentPage * projectsPerPage;
     const indexOfFirstProject = indexOfLastProject - projectsPerPage;
-    const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
-
+    
+    // Get the grouped projects
+    const groupedProjects = groupProjectsByDate(filteredProjects);
+    const dateGroups = Object.keys(groupedProjects);
+    
+    // Handle pagination for grouped projects
+    const paginatedDateGroups = dateGroups.slice(indexOfFirstProject, indexOfLastProject);
+    
+    // Calculate total pages based on the number of date groups
+    const totalPages = Math.ceil(dateGroups.length / projectsPerPage);
+    
     // Change page
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Calculate total pages
-    const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
+    // Toggle date grouping
+    const toggleGroupByDate = () => {
+        setGroupByDate(!groupByDate);
+        setCurrentPage(1); // Reset to first page when changing view
+    };
 
     return (
         <>
@@ -207,6 +258,21 @@ const ProjectManagement = () => {
                     />
                     <AiOutlineSearch className="absolute left-3 top-3 text-gray-400" />
                   </div>
+                  {/* Date grouping toggle */}
+                  <button
+                    className={`border px-4 py-2 rounded ${groupByDate ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                    onClick={toggleGroupByDate}
+                  >
+                    <AiOutlineCalendar className="inline mr-1" /> 
+                    {groupByDate ? 'Grouped by Date' : 'List View'}
+                  </button>
+                  {/* Sort order toggle */}
+                  <button
+                    className="border px-4 py-2 rounded bg-gray-200"
+                    onClick={handleToggleSortOrder}
+                  >
+                    Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
+                  </button>
                   <button
                     className="border px-4 py-2 rounded bg-blue-600 text-white"
                     onClick={() => setShowAddModal(true)}
@@ -216,60 +282,69 @@ const ProjectManagement = () => {
                 </div>
               </div>
       
-              <div className="border rounded overflow-hidden mt-4">
-                <table className="w-full">
-                  <thead className="bg-gray-100">
-                    <tr className="text-left">
-                      <th className="py-3 px-4">#</th>
-                      <th className="py-3 px-4">Project Name</th>
-                      <th className="py-3 px-4">Start Date</th>
-                      <th className="py-3 px-4">PM Name</th>
-                      <th className="py-3 px-4">Team</th>
-                      <th className="py-3 px-4">Project Cost</th>
-                      <th className="py-3 px-4">Sponsor</th>
-                      <th className="py-3 px-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentProjects.length > 0 ? (
-                      currentProjects.map((project, index) => (
-                        <tr key={project.projectId}>
-                          <td className="py-3 px-4">{indexOfFirstProject + index + 1}</td>
-                          <td className="py-3 px-4">{project.projectName}</td>
-                          <td className="py-3 px-4">
-                            {project.startDate.split("T")[0]}
-                          </td>
-                          <td className="py-3 px-4">
-                            {project.projectManager?.firstName}{" "}
-                            {project.projectManager?.lastName}
-                          </td>
-                          <td className="py-3 px-4">{project.projectTeam.length} members</td>
-                          <td className="py-3 px-4">₹{project.projectCost}</td>
-                          <td className="py-3 px-4">{project.tenent || "N/A"}</td>
-                          <td className="py-3 px-4">
-                            <button
-                              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                              onClick={() => handleManageTeam(project.projectId)}
-                            >
-                              Manage Team
-                            </button>
-                          </td>
+              {/* Date-grouped Project View */}
+              {paginatedDateGroups.map(date => (
+                <div key={date} className="mb-8">
+                  <h2 className="text-xl font-semibold bg-gray-100 p-3 rounded mb-3 mt-5">
+                    <AiOutlineCalendar className="inline mr-2" />
+                    {date === "All Projects" ? "All Projects" : `Projects for ${date}`}
+                  </h2>
+                  <div className="border rounded overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-gray-100">
+                        <tr className="text-left">
+                          <th className="py-3 px-4">#</th>
+                          <th className="py-3 px-4">Project Name</th>
+                          <th className="py-3 px-4">Start Date</th>
+                          <th className="py-3 px-4">PM Name</th>
+                          <th className="py-3 px-4">Team</th>
+                          <th className="py-3 px-4">Project Cost</th>
+                          <th className="py-3 px-4">Sponsor</th>
+                          <th className="py-3 px-4">Actions</th>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="8" className="py-4 text-center">
-                          No projects found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      </thead>
+                      <tbody>
+                        {groupedProjects[date].length > 0 ? (
+                          groupedProjects[date].map((project, index) => (
+                            <tr key={project.projectId}>
+                              <td className="py-3 px-4">{index + 1}</td>
+                              <td className="py-3 px-4">{project.projectName}</td>
+                              <td className="py-3 px-4">
+                                {project.startDate.split("T")[0]}
+                              </td>
+                              <td className="py-3 px-4">
+                                {project.projectManager?.firstName}{" "}
+                                {project.projectManager?.lastName}
+                              </td>
+                              <td className="py-3 px-4">{project.projectTeam.length} members</td>
+                              <td className="py-3 px-4">₹{project.projectCost}</td>
+                              <td className="py-3 px-4">{project.tenent || "N/A"}</td>
+                              <td className="py-3 px-4">
+                                <button
+                                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                                  onClick={() => handleManageTeam(project.projectId)}
+                                >
+                                  Manage Team
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="8" className="py-4 text-center">
+                              No projects found
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
               
               {/* Pagination */}
-              {filteredProjects.length > 0 && (
-                <div className="flex justify-center mt-4">
+              {dateGroups.length > 0 && (
+                <div className="flex justify-center mt-4 mb-6">
                   <nav className="flex items-center">
                     <button
                       onClick={() => paginate(Math.max(1, currentPage - 1))}
