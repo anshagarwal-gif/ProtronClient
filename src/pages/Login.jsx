@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { EyeIcon, EyeOffIcon, MailIcon, UserIcon } from 'lucide-react';
+import { EyeIcon, EyeOffIcon, MailIcon } from 'lucide-react';
 import GlobalSnackbar from '../components/GlobalSnackbar';
 import axios from 'axios';
+import ForgotPassword from './ForgotPassword'; // Import the new component
 
 const Login = ({ onLogin, onSwitchToSignup }) => {
     const [snackbar, setSnackbar] = useState({
@@ -12,8 +13,8 @@ const Login = ({ onLogin, onSwitchToSignup }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('');
     const [error, setError] = useState('');
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -27,13 +28,11 @@ const Login = ({ onLogin, onSwitchToSignup }) => {
             setError('All fields are required');
             return;
         }
-        // Call the login handler from parent component
 
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, {
                 email,
                 password,
-                role,
             });
             console.log('Login successful:', response.data);
 
@@ -53,6 +52,14 @@ const Login = ({ onLogin, onSwitchToSignup }) => {
             console.error('Login failed:', error.response?.data);
         }
     };
+
+    if (showForgotPassword) {
+        return (
+            <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4">
+                <ForgotPassword onBack={() => setShowForgotPassword(false)} />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-blue-50 flex items-center justify-center p-4">
@@ -85,32 +92,6 @@ const Login = ({ onLogin, onSwitchToSignup }) => {
                         </div>
                     </div>
 
-                    {/* <div className="mb-6">
-                        <label htmlFor="role" className="block text-gray-700 mb-2">Select Role</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <UserIcon className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <select
-                                id="role"
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md appearance-none focus:ring-blue-500 focus:border-blue-500"
-                                value={role}
-                                onChange={(e) => setRole(e.target.value)}
-                                required
-                            >
-                                <option value="">Select your role</option>
-                                <option value="admin">Admin</option>
-                                <option value="user">User</option>
-                                <option value="manager">Manager</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div> */}
-
                     <div className="mb-2">
                         <label htmlFor="password" className="block text-gray-700 mb-2">Password</label>
                         <div className="relative">
@@ -138,9 +119,13 @@ const Login = ({ onLogin, onSwitchToSignup }) => {
                     </div>
 
                     <div className="text-right mb-6">
-                        <a href="#" className="text-blue-600 text-sm hover:underline">
+                        <button 
+                            type="button"
+                            onClick={() => setShowForgotPassword(true)}
+                            className="text-blue-600 text-sm hover:underline"
+                        >
                             Forgot your password?
-                        </a>
+                        </button>
                     </div>
 
                     <button
@@ -164,13 +149,13 @@ const Login = ({ onLogin, onSwitchToSignup }) => {
                 </div>
             </div>
             <GlobalSnackbar
-                    open={snackbar.open}
-                    message={snackbar.message}
-                    severity={snackbar.severity}
-                    onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-                />
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
+                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+            />
         </div>
     );
 }
 
-export default Login
+export default Login;
