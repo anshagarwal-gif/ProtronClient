@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EyeIcon, EyeOffIcon, MailIcon, UserIcon, PhoneIcon, MapPinIcon } from 'lucide-react';
+import { EyeIcon, EyeOffIcon, MailIcon, UserIcon, PhoneIcon, MapPinIcon, DollarSignIcon,UploadIcon } from 'lucide-react';
 import axios from 'axios';
 import GlobalSnackbar from '../components/GlobalSnackbar';
 
@@ -21,7 +21,8 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
         mobileNumber: '',
         landlineCountryCode: '+91',
         landlineNumber: '',
-        // userRole: '',
+        cost: '',
+        costUnit: 'USD',
         addressLine1: '',
         addressLine2: '',
         addressLine3: '',
@@ -30,8 +31,11 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
         city: '',
         state: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        status:"active"
     });
+    const [photo, setPhoto] = useState(null);
+    const [photoPreview, setPhotoPreview] = useState(null);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -62,7 +66,19 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
             }
         }
     };
-
+  const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setPhoto(file);
+            
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPhotoPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -76,19 +92,31 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
             setError('Passwords do not match');
             return;
         }
-
-        // Create a new object with combined phone numbers before submitting
-        const submissionData = {
-            ...formData,
-            // Combine country code and phone number for submission
-            mobilePhone: formData.mobileNumber ? `${formData.mobileCountryCode}${formData.mobileNumber}` : '',
-            lanPhone: formData.landlineNumber ? `${formData.landlineCountryCode}${formData.landlineNumber}` : ''
-        };
-
-        // Call the signup handler from parent component with combined data
-
+        const submissionData = new FormData();
+        
+        // Add all form fields to FormData
+        Object.keys(formData).forEach(key => {
+            submissionData.append(key, formData[key]);
+        });
+        
+        // Add combined phone numbers
+        submissionData.append('mobilePhone', formData.mobileNumber ? `${formData.mobileCountryCode}${formData.mobileNumber}` : '');
+        submissionData.append('lanPhone', formData.landlineNumber ? `${formData.landlineCountryCode}${formData.landlineNumber}` : '');
+        
+        // Add photo if exists
+        if (photo) {
+            submissionData.append('profilePhoto', photo);
+        }
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/signup`, submissionData);
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/users/signup`, 
+                submissionData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
             setSnackbar({
                 open: true,
                 message: 'Signup successful!',
@@ -103,8 +131,6 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                 severity: 'error',
             });
         }
-
-        
     };
 
     return (
@@ -120,9 +146,9 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Email Address - Mandatory */}
-                        <div>
+                        <div className="md:col-span-2">
                             <label htmlFor="email" className="block text-gray-700 mb-2">Email Address <span className="text-red-500">*</span></label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -148,7 +174,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                 id="firstName"
                                 name="firstName"
                                 type="text"
-                                placeholder="Enter your first name"
+                                placeholder="First name"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                 value={formData.firstName}
                                 onChange={handleChange}
@@ -163,7 +189,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                 id="middleName"
                                 name="middleName"
                                 type="text"
-                                placeholder="Enter your middle name"
+                                placeholder="Middle name"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                 value={formData.middleName}
                                 onChange={handleChange}
@@ -177,7 +203,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                 id="lastName"
                                 name="lastName"
                                 type="text"
-                                placeholder="Enter your last name"
+                                placeholder="Last name"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                 value={formData.lastName}
                                 onChange={handleChange}
@@ -196,7 +222,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                     id="displayName"
                                     name="displayName"
                                     type="text"
-                                    placeholder="Enter display name"
+                                    placeholder="Display name"
                                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.displayName}
                                     onChange={handleChange}
@@ -204,14 +230,48 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                             </div>
                         </div>
 
-                        {/* Mobile Phone */}
+                        {/* Cost - New Field with Unit Before Cost */}
                         <div>
+                            <label htmlFor="cost" className="block text-gray-700 mb-2">Cost</label>
+                            <div className="flex">
+                                <select
+                                    id="costUnit"
+                                    name="costUnit"
+                                    className="w-20 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
+                                    value={formData.costUnit}
+                                    onChange={handleChange}
+                                >
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="INR">INR</option>
+                                    <option value="AUD">AUD</option>
+                                </select>
+                                <div className="relative flex-1">
+                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <DollarSignIcon className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        id="cost"
+                                        name="cost"
+                                        type="number"
+                                        placeholder="0.00"
+                                        className="w-full pl-10 pr-2 py-2 border border-gray-300 rounded-r-md focus:ring-blue-500 focus:border-blue-500"
+                                        value={formData.cost}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Mobile Phone */}
+                        <div className="md:col-span-2">
                             <label htmlFor="mobileNumber" className="block text-gray-700 mb-2">Mobile Phone</label>
                             <div className="flex">
                                 <select
                                     id="mobileCountryCode"
                                     name="mobileCountryCode"
-                                    className="w-24 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-20 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.mobileCountryCode}
                                     onChange={handleChange}
                                 >
@@ -228,7 +288,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                         id="mobileNumber"
                                         name="mobileNumber"
                                         type="tel"
-                                        placeholder="Enter mobile number"
+                                        placeholder="Mobile number"
                                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-r-md focus:ring-blue-500 focus:border-blue-500"
                                         value={formData.mobileNumber}
                                         onChange={handleChange}
@@ -242,13 +302,13 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                         </div>
 
                         {/* Landline Phone */}
-                        <div>
+                        <div className="md:col-span-1">
                             <label htmlFor="landlineNumber" className="block text-gray-700 mb-2">Landline</label>
                             <div className="flex">
                                 <select
                                     id="landlineCountryCode"
                                     name="landlineCountryCode"
-                                    className="w-24 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-20 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.landlineCountryCode}
                                     onChange={handleChange}
                                 >
@@ -261,7 +321,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                     id="landlineNumber"
                                     name="landlineNumber"
                                     type="tel"
-                                    placeholder="Enter landline number"
+                                    placeholder="Landline"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-r-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.landlineNumber}
                                     onChange={handleChange}
@@ -274,15 +334,37 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                         </div>
 
                         {/* Profile Picture */}
-                        <div>
+                        <div className="md:col-span-3">
                             <label className="block text-gray-700 mb-2">Profile Picture</label>
                             <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                                    <UserIcon className="h-6 w-6 text-gray-500" />
+                                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                                    {photoPreview ? (
+                                        <img 
+                                            src={photoPreview} 
+                                            alt="Profile preview" 
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <UserIcon className="h-8 w-8 text-gray-500" />
+                                    )}
                                 </div>
-                                <button type="button" className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                                <input
+                                    type="file"
+                                    id="photo-upload"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                />
+                                <label 
+                                    htmlFor="photo-upload"
+                                    className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 cursor-pointer"
+                                >
+                                    <UploadIcon className="h-5 w-5 mr-2" />
                                     Upload Photo
-                                </button>
+                                </label>
+                                {photo && (
+                                    <span className="text-sm text-gray-600">{photo.name}</span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -290,9 +372,9 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                     {/* Address Fields */}
                     <div className="border-t border-b border-gray-200 py-6">
                         <h2 className="text-lg font-medium mb-4">Address Information</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {/* Address Line 1 */}
-                            <div>
+                            <div className="md:col-span-3">
                                 <label htmlFor="addressLine1" className="block text-gray-700 mb-2">Address Line 1</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -302,7 +384,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                         id="addressLine1"
                                         name="addressLine1"
                                         type="text"
-                                        placeholder="Enter address line 1"
+                                        placeholder="Address line 1"
                                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                         value={formData.addressLine1}
                                         onChange={handleChange}
@@ -311,13 +393,13 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                             </div>
 
                             {/* Address Line 2 */}
-                            <div>
+                            <div className="md:col-span-3">
                                 <label htmlFor="addressLine2" className="block text-gray-700 mb-2">Address Line 2</label>
                                 <input
                                     id="addressLine2"
                                     name="addressLine2"
                                     type="text"
-                                    placeholder="Enter address line 2"
+                                    placeholder="Address line 2"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.addressLine2}
                                     onChange={handleChange}
@@ -325,13 +407,13 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                             </div>
 
                             {/* Address Line 3 */}
-                            <div>
+                            <div className="md:col-span-3">
                                 <label htmlFor="addressLine3" className="block text-gray-700 mb-2">Address Line 3</label>
                                 <input
                                     id="addressLine3"
                                     name="addressLine3"
                                     type="text"
-                                    placeholder="Enter address line 3"
+                                    placeholder="Address line 3"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.addressLine3}
                                     onChange={handleChange}
@@ -363,7 +445,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                     id="zipCode"
                                     name="zipCode"
                                     type="text"
-                                    placeholder="Enter zip code"
+                                    placeholder="Zip code"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.zipCode}
                                     onChange={handleChange}
@@ -377,7 +459,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                     id="city"
                                     name="city"
                                     type="text"
-                                    placeholder="Enter city"
+                                    placeholder="City"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.city}
                                     onChange={handleChange}
@@ -392,7 +474,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                     id="state"
                                     name="state"
                                     type="text"
-                                    placeholder="Enter state"
+                                    placeholder="State"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.state}
                                     onChange={handleChange}
@@ -412,7 +494,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                                     id="password"
                                     name="password"
                                     type={showPassword ? "text" : "password"}
-                                    placeholder="Enter password"
+                                    placeholder="Password"
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                     value={formData.password}
                                     onChange={handleChange}
@@ -473,11 +555,11 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                 </form>
             </div>
             <GlobalSnackbar
-                    open={snackbar.open}
-                    message={snackbar.message}
-                    severity={snackbar.severity}
-                    onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-                />
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
+                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+            />
         </div>
     );
 };

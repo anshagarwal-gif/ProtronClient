@@ -1,5 +1,6 @@
-import {FiHome, FiUser, FiUserCheck, FiFolder, FiClock} from "react-icons/fi"
-const Sidebar = ({ activeSection, setActiveSection }) => {
+import {FiHome, FiUser, FiUserCheck, FiFolder, FiClock,FiLogOut} from "react-icons/fi"
+const Sidebar = ({ activeSection, setActiveSection, handleLogout }) => {
+    
     return (
         <div className="sidebar-main flex flex-col h-screen bg-blue-900 text-white w-72 py-4 overflow-auto">
             <div className="px-4 mb-6 text-center border-b border-blue-300 pb-6">
@@ -33,6 +34,15 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
                 </div>
                 {/* Keep the Projects and Teams sections as-is or apply similar logic */}
             </nav>
+            <div className="mt-auto px-4 pt-4 border-t border-blue-700">
+                <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center px-2 py-3 text-left rounded bg-blue-800 hover:bg-orange-500 transition-colors duration-200"
+                >
+                    <FiLogOut className="mr-3" />
+                    <span>Logout</span>
+                </button>
+            </div>
         </div>
     );
 };

@@ -96,19 +96,14 @@ const App = () => {
 
     // Render main app layout if authenticated
     return (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+<LocalizationProvider dateAdapter={AdapterDayjs}>
             <div className="flex flex-col h-screen">
-                <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-                    <h1 className="text-xl font-bold">Application Dashboard</h1>
-                    <button
-                        onClick={handleLogout}
-                        className="bg-blue-700 px-4 py-2 rounded hover:bg-blue-800"
-                    >
-                        Logout
-                    </button>
-                </div>
                 <div className="flex flex-1 overflow-hidden">
-                    <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+                    <Sidebar 
+                        activeSection={activeSection} 
+                        setActiveSection={setActiveSection} 
+                        handleLogout={handleLogout} 
+                    />
                     <div className="flex-1 p-6 overflow-y-auto">{renderContent()}</div>
                 </div>
                 <GlobalSnackbar
@@ -118,7 +113,6 @@ const App = () => {
                     onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
                 />
             </div>
-
         </LocalizationProvider>
     );
 };

@@ -143,7 +143,7 @@ const TeamManagement = () => {
                                 <tr key={member.id} className="border-t">
                                     <td className="py-3 px-4">{member.userId}</td>
                                     <td className="py-3 px-4 flex items-center cursor-pointer" onClick={() => handleProfileClick(member.email)}>
-                                        <img src={member.avatar ? member.avatar : "./profilepic.jpg"} alt={member.name} className="w-8 h-8 rounded-full mr-2" />
+                                        <img src={`${import.meta.env.VITE_API_URL}/api/users/${member.userId}/photo`} alt={member.name} className="w-12 h-12 rounded-full object-cover border border-gray-200 mr-2" />
                                         <span>
                                             {member.firstName + member.lastName}
                                         </span>
