@@ -344,6 +344,56 @@ const AddProjectModal = ({ open, onClose, onSubmit, formData, setFormData }) => 
                         </Box>
                     </Box>
 
+                    {/* Row 4: Currency, Cost, and Submit Button (3 elements in one row) */}
+                    <Grid item xs={12} sm={4}>
+                        <FormControl fullWidth>
+                            <InputLabel>Currency</InputLabel>
+                            <Select
+                                value={formData.currency}
+                                onChange={handleChange('currency')}
+                                label="Currency"
+                                sx={{ height: '56px' }}
+                            >
+                                {currencies.map((currency) => (
+                                    <MenuItem key={currency} value={currency}>
+                                        <Typography variant="body1">{currency}</Typography>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                        <TextField
+                            fullWidth
+                            label="Project Cost"
+                            placeholder="Enter amount"
+                            type="number"
+                            value={formData.cost}
+                            onChange={handleChange('cost')}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <AttachMoneyIcon color="primary" />
+                                        {formData.currency ? currencySymbols[formData.currency] : '$'}
+                                    </InputAdornment>
+                                )
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+  <TextField
+    fullWidth
+    label="Sponsor Name"
+    placeholder="Enter sponsor or tenent"
+    value={formData.tenent}
+    onChange={(e) =>
+      setFormData((prev) => ({ ...prev, tenent: e.target.value }))
+    }
+    variant="outlined"
+  />
+</Grid>
+
+                    <Grid item xs={12} sm={4}>
                     {/* Row 4: Currency and Cost */}
                     <Box sx={{ display: 'flex', gap: 3 }}>
                         <Box sx={{ width: '30%' }}>
