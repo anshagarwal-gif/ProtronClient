@@ -13,6 +13,7 @@ const ProjectManagement = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showTeamManagement, setShowTeamManagement] = useState(false);
     const [selectedProjectId, setSelectedProjectId] = useState(null);
+    const [selectedProject, setSelectedProject] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [groupByDate, setGroupByDate] = useState(true);
     const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
@@ -85,13 +86,15 @@ const ProjectManagement = () => {
         setSortOrder(newOrder);
     };
 
-    const handleManageTeam = (projectId) => {
+    const handleManageTeam = (projectId, project) => {
         setSelectedProjectId(projectId);
+        setSelectedProject(project)
         setShowTeamManagement(true);
     };
 
     const handleCloseTeamManagement = () => {
         setSelectedProjectId(null);
+        setSelectedProject(null);
         setShowTeamManagement(false);
     };
 
@@ -231,6 +234,7 @@ const ProjectManagement = () => {
           {showTeamManagement && selectedProjectId ? (
             <ProjectTeamManagement
               projectId={selectedProjectId}
+              project={selectedProject}
               onClose={handleCloseTeamManagement}
             />
           ) : (
@@ -322,7 +326,7 @@ const ProjectManagement = () => {
                               <td className="py-3 px-4">
                                 <button
                                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                                  onClick={() => handleManageTeam(project.projectId)}
+                                  onClick={() => handleManageTeam(project.projectId, project)}
                                 >
                                   Manage Team
                                 </button>

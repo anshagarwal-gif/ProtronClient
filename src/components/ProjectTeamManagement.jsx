@@ -6,7 +6,7 @@ import EditTeamMemberModal from './EditTeamMemberModal';
 // Import the AssignTeamMemberModal component
 import AssignTeamMemberModal from './AssignTeamMemberModal';
 
-const ProjectTeamManagement = ({ projectId, onClose }) => {
+const ProjectTeamManagement = ({ projectId, project, onClose }) => {
     console.log(projectId)
     const [teamMembers, setTeamMembers] = useState([
 
@@ -168,7 +168,7 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
             console.error("Failed to update member details:", error);
         }
     };
-
+    console.log(project)
     return (
         <div className="w-full bg-white rounded-lg shadow-md p-6">
             {/* Header */}
@@ -187,15 +187,16 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
             {/* Project Details */}
             <div className="grid grid-cols-3 gap-6 mb-8 bg-[#AECCE4] p-4 rounded-lg">
                 <div>
-                    <p className="text-gray-500 text-sm">Start Date: <span className="font-medium text-gray-700">08 Jan 2015</span></p>
-                    <p className="text-gray-500 text-sm mt-2">Estimated End Date: <span className="font-medium text-gray-700">10-Jan-2026</span></p>
+                    <p className="text-gray-500 text-sm">Project Name: <span className="font-medium text-gray-700">{project.projectName}</span></p>
+                    <p className="text-gray-500 text-sm mt-2">Start Date: <span className="font-medium text-gray-700">{project.startDate.split("T")[0]}</span></p>
                 </div>
                 <div>
-                    <p className="text-gray-500 text-sm">PM Name: <span className="font-medium text-gray-700"></span></p>
-                    <p className="text-gray-500 text-sm mt-2">Sponsor: <span className="font-medium text-gray-700">Alfie Wood</span></p>
+                    <p className="text-gray-500 text-sm">PM Name: <span className="font-medium text-gray-700">{project.projectManager?.firstName}{" "}
+                    {project.projectManager?.lastName}</span></p>
+                    <p className="text-gray-500 text-sm mt-2">Sponsor: <span className="font-medium text-gray-700">{project.tenent || "N/A"}</span></p>
                 </div>
                 <div>
-                    <p className="text-gray-500 text-sm">Project Cost: <span className="font-medium text-gray-700">$10,000</span></p>
+                    <p className="text-gray-500 text-sm">Project Cost: <span className="font-medium text-gray-700">{project.projectCost}</span></p>
                     <p className="text-gray-500 text-sm mt-2">System Impacted: <span className="font-medium text-gray-700">Sys1, Sys2, Sys3</span></p>
                 </div>
             </div>
@@ -340,7 +341,7 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
             <AssignTeamMemberModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                projectName="Project Name"
+                projectName={project.projectName}
                 onAddMember={handleAddMember}
                 users={users} // Pass the users data to the modal
             />
