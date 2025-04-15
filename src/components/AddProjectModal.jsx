@@ -12,6 +12,7 @@ import {
     Autocomplete,
     Typography,
     Box,
+    Grid,
     Paper,
     InputAdornment
 } from '@mui/material';
@@ -345,41 +346,7 @@ const AddProjectModal = ({ open, onClose, onSubmit, formData, setFormData }) => 
                     </Box>
 
                     {/* Row 4: Currency, Cost, and Submit Button (3 elements in one row) */}
-                    <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth>
-                            <InputLabel>Currency</InputLabel>
-                            <Select
-                                value={formData.currency}
-                                onChange={handleChange('currency')}
-                                label="Currency"
-                                sx={{ height: '56px' }}
-                            >
-                                {currencies.map((currency) => (
-                                    <MenuItem key={currency} value={currency}>
-                                        <Typography variant="body1">{currency}</Typography>
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <TextField
-                            fullWidth
-                            label="Project Cost"
-                            placeholder="Enter amount"
-                            type="number"
-                            value={formData.cost}
-                            onChange={handleChange('cost')}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <AttachMoneyIcon color="primary" />
-                                        {formData.currency ? currencySymbols[formData.currency] : '$'}
-                                    </InputAdornment>
-                                )
-                            }}
-                        />
-                    </Grid>
+                    
                     <Grid item xs={12} sm={6}>
   <TextField
     fullWidth
@@ -446,6 +413,7 @@ const AddProjectModal = ({ open, onClose, onSubmit, formData, setFormData }) => 
                                 height: fieldHeight,
                                 fontWeight: 600,
                                 boxShadow: 2,
+                                marginTop:"10px",
                                 '&:hover': {
                                     boxShadow: 4
                                 }
@@ -454,6 +422,7 @@ const AddProjectModal = ({ open, onClose, onSubmit, formData, setFormData }) => 
                             Create Project
                         </Button>
                     </Box>
+                </Grid>
                 </Box>
             </DialogContent>
         </Dialog>
