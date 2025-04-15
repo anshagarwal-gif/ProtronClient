@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FiChevronLeft, FiChevronRight, FiChevronsLeft, FiChevronsRight, FiPlus, FiChevronDown, FiUser } from 'react-icons/fi';
 import axios from 'axios';
+import EditTeamMemberModal from './EditTeamMemberModal';
 
 // Import the AssignTeamMemberModal component
 import AssignTeamMemberModal from './AssignTeamMemberModal';
@@ -15,6 +16,10 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [actionsOpen, setActionsOpen] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingMember, setEditingMember] = useState(null);
+
     const fetchTeammates = async () => {
         try {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`)
@@ -128,6 +133,42 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
         }
     };
 
+    // At the top with other state declarations
+
+
+    // Add this handler function
+    const handleEditMember = (member) => {
+        setEditingMember(member);
+        setIsEditModalOpen(true);
+        setActionsOpen({});
+    };
+
+    // Add the update function
+    const handleUpdateMember = async (updatedData, id) => {
+        console.log("Updated Data:", updatedData)
+
+        try {
+            await axios.put(
+                `${import.meta.env.VITE_API_URL}/api/project-team/edit/${id}`,
+                updatedData
+            );
+
+            // Update local state
+            setTeamMembers(prevMembers =>
+                prevMembers.map(member =>
+                    member.projectTeamId === editingMember.projectTeamId
+                        ? { ...member, ...updatedData }
+                        : member
+                )
+            );
+
+            setIsEditModalOpen(false);
+        } catch (error) {
+            alert("Failed to update member details");
+            console.error("Failed to update member details:", error);
+        }
+    };
+
     return (
         <div className="w-full bg-white rounded-lg shadow-md p-6">
             {/* Header */}
@@ -232,6 +273,12 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
                                         {actionsOpen[member.projectTeamId] && (
                                             <div className="absolute right-4 mt-1 bg-white shadow-lg border rounded z-10 w-32">
                                                 <button
+                                                    onClick={() => handleEditMember(member)}
+                                                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
                                                     onClick={() =>
                                                         handleStatusChange(
                                                             member.projectTeamId,
@@ -297,6 +344,16 @@ const ProjectTeamManagement = ({ projectId, onClose }) => {
                 onAddMember={handleAddMember}
                 users={users} // Pass the users data to the modal
             />
+
+            {/* Add this before closing div */}
+            {editingMember && (
+                <EditTeamMemberModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => {setIsEditModalOpen(false); setEditingMember(null);}}
+                    member={editingMember}
+                    onUpdate={handleUpdateMember}
+                />
+            )}
         </div>
     );
 };
