@@ -56,32 +56,44 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
 
     const handleStatusChange = async (id, newStatus) => {
         setActionsOpen(!actionsOpen[id]);
-        console.log("handle Status Change function is called")
+        console.log("handle Status Change function is called");
+    
         try {
-            // Call backend to update status
-            await axios.patch(`${import.meta.env.VITE_API_URL}/api/project-team/${id}/status`, null, {
-                params: { status: newStatus }
-            });
-
-            // Refetch updated team members from backend
-            setTeamMembers((prevMembers) => prevMembers.map((member) => {
-                if (member.projectTeamId === id) {
-                    return { ...member, status: newStatus };
+            // Corrected axios.patch with proper argument order
+            await axios.patch(
+                `${import.meta.env.VITE_API_URL}/api/project-team/${id}/status`,
+                null, // No data body, just updating via query params
+                {
+                    headers: {
+                        Authorization: `${sessionStorage.getItem('token')}`
+                    },
+                    params: {
+                        status: newStatus
+                    }
                 }
-                return member;
-            }
-            ));
+            );
+    
+            // Update frontend state
+            setTeamMembers((prevMembers) =>
+                prevMembers.map((member) =>
+                    member.projectTeamId === id
+                        ? { ...member, status: newStatus }
+                        : member
+                )
+            );
         } catch (error) {
-            alert("Failed to update status:", error);
+            alert("Failed to update status");
             console.error("Failed to update status:", error);
         }
-    }
-
+    };
+    
     const handleRemoveMember = async (id) => {
         setActionsOpen(!actionsOpen[id]);
         console.log("remove function is called")
         try {
-            const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/project-team/delete/${id}`);
+            const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/project-team/delete/${id}`,{
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            });
             console.log("Deleted successfully:", response.data);
 
             setTeamMembers((prevMembers) => prevMembers.filter((member) => member.projectTeamId !== id));
@@ -110,7 +122,9 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                 estimatedReleaseDate: memberData.releaseDate,
             };
             console.log("Request Body:", requestBody);
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/project-team/add`, requestBody);
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/project-team/add`, requestBody,{
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            });
 
             // 2. Refetch the updated team list
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`);
@@ -150,7 +164,9 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
         try {
             await axios.put(
                 `${import.meta.env.VITE_API_URL}/api/project-team/edit/${id}`,
-                updatedData
+                updatedData,{
+                    headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+                }
             );
 
             // Update local state

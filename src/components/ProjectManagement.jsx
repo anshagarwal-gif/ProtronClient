@@ -41,7 +41,9 @@ const ProjectManagement = () => {
 
     const fetchProjects = async () => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/api/projects`);
+            const res = await axios.get(`${API_BASE_URL}/api/projects`,{
+              headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+          });
             const sortedProjects = sortProjects(res.data, sortOrder);
             setProjects(sortedProjects);
             setFilteredProjects(sortedProjects);

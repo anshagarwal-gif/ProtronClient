@@ -42,7 +42,9 @@ const AddProjectModal = ({ open, onClose, onSubmit, formData, setFormData }) => 
 
     const fetchUsers = async () => {
         try {
-            const res = await axios.get(`http://localhost:8282/api/users`);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`,{
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            });
             setUsers(res.data);
         } catch (error) {
             console.log({ message: error });

@@ -22,7 +22,9 @@ const TeamManagement = () => {
 
     const fetchEmployees = async () => {
         try {
-            const res = await axios.get("http://localhost:8282/api/users")
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`,{
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            })
             setEmployees(res.data)
             console.log(res)
         } catch (error) {
@@ -35,7 +37,9 @@ const TeamManagement = () => {
     console.log(employees)
     const handleProfileClick = async (email) => {
         try {
-            const res = await axios.get(`http://localhost:8282/api/users/email/${email}`); // adjust your endpoint if needed
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/email/${email}`,{
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            }); // adjust your endpoint if needed
             console.log(res.data)
             setSelectedProfile(res.data);
             setIsProfileOpen(true);
@@ -57,8 +61,11 @@ const TeamManagement = () => {
         try {
             // Call backend to update the status of the project team member
             const response = await axios.patch(
-                `http://localhost:8282/api/project-team/${id}/status`,
+                `${import.meta.env.VITE_API_URL}/api/project-team/${id}/status`,
                 {},
+                {
+                    headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+                },
                 {
                     params: { status: newStatus },
                     headers: {
@@ -70,7 +77,9 @@ const TeamManagement = () => {
             console.log("Status updated successfully:", response.data);
 
             // Refetch updated list of employees
-            const updatedList = await axios.get(`http://localhost:8282/api/users`);
+            const updatedList = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`,{
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            });
             setEmployees(updatedList.data);
 
             // Close the actions dropdown
