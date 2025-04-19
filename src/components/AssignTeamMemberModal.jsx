@@ -202,7 +202,7 @@ const AssignTeamMemberModal = ({ users, isOpen, onClose, projectName, onAddMembe
               <button
                 type="button"
                 onClick={handleReset}
-                className="px-6 py-2 text-gray-600 hover:text-gray-800"
+                className="px-6 py-2 text-green-900 hover:text-gray-800"
               >
                 Reset
               </button>
@@ -215,7 +215,7 @@ const AssignTeamMemberModal = ({ users, isOpen, onClose, projectName, onAddMembe
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+                className="px-6 py-2 bg-green-900 text-white rounded hover:bg-green-600"
               >
                 Add
               </button>

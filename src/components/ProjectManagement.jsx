@@ -266,10 +266,10 @@ const ProjectManagement = () => {
                   </div>
                   {/* Date grouping toggle */}
                   <button
-                    className={`border px-4 py-2 rounded ${groupByDate ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                    className={`border px-4 py-2 rounded hover:bg-green-600 ${groupByDate ? 'bg-green-900 text-white' : 'bg-gray-200'}`}
                     onClick={toggleGroupByDate}
                   >
-                    <AiOutlineCalendar className="inline mr-1" /> 
+                    <AiOutlineCalendar className="inline mr-1 " /> 
                     {groupByDate ? 'Grouped by Date' : 'List View'}
                   </button>
                   {/* Sort order toggle */}
@@ -280,7 +280,7 @@ const ProjectManagement = () => {
                     Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
                   </button>
                   <button
-                    className="border px-4 py-2 rounded bg-blue-600 text-white"
+                    className="border px-4 py-2 rounded bg-green-900 text-white hover:bg-green-600"
                     onClick={() => setShowAddModal(true)}
                   >
                     Add Project
@@ -327,7 +327,7 @@ const ProjectManagement = () => {
                               <td className="py-3 px-4">{project.tenent || "N/A"}</td>
                               <td className="py-3 px-4">
                                 <button
-                                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                                  className="bg-green-900 text-white px-3 py-1 rounded hover:bg-green-600"
                                   onClick={() => handleManageTeam(project.projectId, project)}
                                 >
                                   Manage Team
@@ -358,7 +358,7 @@ const ProjectManagement = () => {
                       className={`mx-1 px-3 py-1 rounded ${
                         currentPage === 1 
                           ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                          : 'bg-green-900 text-white hover:bg-green-600'
                       }`}
                     >
                       Prev
@@ -371,7 +371,7 @@ const ProjectManagement = () => {
                           onClick={() => paginate(number + 1)}
                           className={`mx-1 px-3 py-1 rounded ${
                             currentPage === number + 1
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-green-900 text-white'
                               : 'bg-gray-200 hover:bg-gray-300'
                           }`}
                         >
@@ -386,7 +386,7 @@ const ProjectManagement = () => {
                       className={`mx-1 px-3 py-1 rounded ${
                         currentPage === totalPages || totalPages === 0
                           ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                          : 'bg-green-900 text-white hover:bg-green-600'
                       }`}
                     >
                       Next

@@ -190,12 +190,12 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <div className='flex items-center'>
-                    <div onClick={onClose} className="bg-blue-500 text-white p-2 rounded-full mr-2">
+                    <div onClick={onClose} className="bg-[#328E6E] text-white p-2 rounded-full mr-2 hover:bg-green-600">
                         <FiChevronLeft />
                     </div>
-                    <h1 className="text-blue-800 text-lg font-bold">Manage Projects</h1>
+                    <h1 className="text-green-900 text-lg font-bold ">Manage Projects</h1>
                 </div>
-                <button className="bg-orange-500 text-white px-4 py-1 rounded text-sm">
+                <button className="bg-green-900 text-white px-4 py-1 rounded text-sm hover:bg-green-600">
                     Edit
                 </button>
             </div>
@@ -223,7 +223,7 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                     <h2 className="font-bold text-gray-800">Manage Team Member</h2>
                     <div className="flex items-center">
                         <button
-                            className="bg-orange-500 text-white px-3 py-2 rounded flex items-center text-sm"
+                            className="bg-green-900 text-white px-3 py-2 rounded flex items-center text-sm hover:bg-green-600"
                             onClick={() => setIsModalOpen(true)}
                         >
                             <FiPlus size={16} className="mr-1" />
