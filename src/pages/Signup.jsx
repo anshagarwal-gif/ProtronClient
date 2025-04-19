@@ -122,6 +122,7 @@ const Signup = ({ onSignup, onSwitchToLogin }) => {
                 message: 'Signup successful!',
                 severity: 'success',
             });
+            sessionStorage.setItem('token', response.data.token);
             onSignup(true);
         } catch (error) {
             console.error('Signup failed:', error.response?.data || error.message);

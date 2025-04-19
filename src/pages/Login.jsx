@@ -42,6 +42,7 @@ const Login = ({ onLogin, onSwitchToSignup }) => {
                 message: 'Login successful!',
                 severity: 'success',
             });
+            sessionStorage.setItem('token', response.data.token);
             onLogin(true);
         } catch (error) {
             setSnackbar({
