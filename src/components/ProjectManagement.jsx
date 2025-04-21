@@ -140,7 +140,12 @@ const ProjectManagement = () => {
           }))
           };
           
-            const response = await axios.post(`${API_BASE_URL}/api/projects/add`, payload);
+            const response = await axios.post(`${API_BASE_URL}/api/projects/add`, payload,  {
+              headers: {
+                Authorization: `${sessionStorage.getItem('token')}`, // or "Bearer " + token if needed
+                'Content-Type': 'application/json',
+              },
+            });
             console.log('Project added successfully:', response.data);
 
             await fetchProjects();
