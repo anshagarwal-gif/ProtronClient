@@ -27,7 +27,7 @@ const ProjectManagement = () => {
         projectIcon: null,
         startDate: null,
         endDate: null,
-        manager: null,
+        projectManager: null,
         teamMembers: [],
         currency: 'USD',
         cost: '',
@@ -45,13 +45,14 @@ const ProjectManagement = () => {
               headers:{ Authorization: `${sessionStorage.getItem('token')}` }
           });
             const sortedProjects = sortProjects(res.data, sortOrder);
+            console.log(sortedProjects)
             setProjects(sortedProjects);
             setFilteredProjects(sortedProjects);
         } catch (error) {
             console.log({ message: error });
         }
     };
-
+    
     // Function to sort projects by date
     const sortProjects = (projectsToSort, order = 'asc') => {
         return [...projectsToSort].sort((a, b) => {
@@ -95,9 +96,11 @@ const ProjectManagement = () => {
     };
 
     const handleCloseTeamManagement = () => {
+
         setSelectedProjectId(null);
         setSelectedProject(null);
         setShowTeamManagement(false);
+        fetchProjects();
     };
 
     const handleAddProjectSubmit = async (data) => {

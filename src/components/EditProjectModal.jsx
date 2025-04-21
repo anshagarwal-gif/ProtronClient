@@ -39,7 +39,7 @@ const currencySymbols = {
 };
 
 const EditProjectModal = ({ open, onClose, onSubmit, formData, setFormData, projectId }) => {
-    
+
     const [users, setUsers] = useState([]);
 
     const fetchUsers = async () => {
@@ -47,6 +47,7 @@ const EditProjectModal = ({ open, onClose, onSubmit, formData, setFormData, proj
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, {
                 headers: { Authorization: `${sessionStorage.getItem('token')}` }
             });
+            console.log(res.data)
             setUsers(res.data);
         } catch (error) {
             console.log({ message: error });
@@ -56,7 +57,7 @@ const EditProjectModal = ({ open, onClose, onSubmit, formData, setFormData, proj
     // Fetch project data when modal opens or projectId changes
     const fetchProjectData = async () => {
         if (!projectId) return;
-        
+
         try {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/projects/${projectId}`, {
                 headers: { Authorization: `${sessionStorage.getItem('token')}` }
@@ -225,11 +226,11 @@ const EditProjectModal = ({ open, onClose, onSubmit, formData, setFormData, proj
 
                         <Box sx={{ flex: 1 }}>
                             <DatePicker
-                                 label="Project End Date"
-                                 value={formData.endDate ? dayjs(formData.endDate) : null}
-                                 onChange={(newDate) =>
-                                     setFormData((prev) => ({ ...prev, endDate: newDate ? newDate.toISOString() : null }))
-                                 }
+                                label="Project End Date"
+                                value={formData.endDate ? dayjs(formData.endDate) : null}
+                                onChange={(newDate) =>
+                                    setFormData((prev) => ({ ...prev, endDate: newDate ? newDate.toISOString() : null }))
+                                }
                                 slotProps={{
                                     textField: {
                                         fullWidth: true,
@@ -252,13 +253,26 @@ const EditProjectModal = ({ open, onClose, onSubmit, formData, setFormData, proj
                         <Box sx={{ flex: 1 }}>
                             <Autocomplete
                                 options={users}
-                                value={users.find(user => user.userId === formData.manager) || null}
-                                getOptionLabel={(option) => option ? `${option.firstName} ${option.lastName}` : ''}
-                                isOptionEqualToValue={(option, value) => option.userId === value.userId}
-                                onChange={(e, value) => setFormData((prev) => ({
-                                    ...prev,
-                                    manager: value ? value.userId : null,
-                                }))}
+                                value={
+                                    // Handle both cases: null projectManager or projectManager with userId
+                                    formData.projectManager?.userId
+                                        ? users.find(user => user.userId === formData.projectManager.userId)
+                                        : null
+                                }
+                                getOptionLabel={(option) =>
+                                    option ? `${option.firstName} ${option.lastName}` : ''
+                                }
+                                isOptionEqualToValue={(option, value) =>
+                                    option?.userId === value?.userId
+                                }
+                                onChange={(e, value) => {
+                                    console.log("Selected manager:", value);
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        // Store the entire user object or null
+                                        projectManager: value || null,
+                                    }));
+                                }}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -275,14 +289,15 @@ const EditProjectModal = ({ open, onClose, onSubmit, formData, setFormData, proj
                                                     {params.InputProps.startAdornment}
                                                 </>
                                             ),
-                                            sx: { height: fieldHeight }
+                                            sx: { height: fieldHeight },
                                         }}
                                     />
                                 )}
                             />
+
                         </Box>
 
-                        
+
                     </Box>
 
                     {/* Sponsor Name */}
@@ -327,17 +342,20 @@ const EditProjectModal = ({ open, onClose, onSubmit, formData, setFormData, proj
                                 placeholder="Enter amount"
                                 type="number"
                                 value={formData.projectCost || ''}
-                                onChange={handleChange('cost')}
+                                onChange={handleChange('projectCost')} // Ensure this matches your state key
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <AttachMoneyIcon color="primary" />
-                                            {formData.currency ? currencySymbols[formData.currency] : '$'}
+                                            <span style={{ display: 'flex', alignItems: 'center' }}>
+                                                <AttachMoneyIcon color="primary" style={{ marginRight: 4 }} />
+                                                {formData.currency ? currencySymbols[formData.currency] : '$'}
+                                            </span>
                                         </InputAdornment>
                                     ),
                                     sx: { height: fieldHeight }
                                 }}
                             />
+
                         </Box>
                     </Box>
 

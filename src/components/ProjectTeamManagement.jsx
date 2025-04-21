@@ -38,6 +38,21 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
     useEffect(() => {
         fetchTeammates()
     }, [])
+    const fetchUsers = async()=>{
+          try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, {
+                headers: { Authorization: `${sessionStorage.getItem('token')}` }
+            })
+            console.log(res.data)
+            setUsers(res.data)
+          } catch (error) {
+            console.log(error)
+          }
+        }
+    
+    useEffect(()=>{
+        fetchUsers()
+    },[])
     const toggleActions = (id) => {
         setActionsOpen((prev) => ({
             ...prev,
@@ -192,64 +207,63 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
         setEditProjectModalOpen(true);
     };
     const handleProjectUpdate = async (updatedData) => {
-        // Basic validation
+        console.log("updatedData:", updatedData);
+      
         if (!updatedData.projectName) {
-          // You might want to add toast/notification here
           console.error("Project name is required");
           return;
         }
       
-        // Show loading state (optional)
         setIsLoading(true);
       
         try {
-          // Prepare the data for API
+          // Prepare the correct payload for backend
           const projectData = {
-            ...updatedData,
-            // Convert dates to ISO strings if they aren't already
-            startDate: updatedData.startDate ? 
-              (typeof updatedData.startDate === 'object' ? updatedData.startDate.toISOString() : updatedData.startDate) 
+            projectName: updatedData.projectName,
+            projectIcon: updatedData.projectIcon,
+            startDate: updatedData.startDate
+              ? typeof updatedData.startDate === 'object'
+                ? updatedData.startDate.toISOString()
+                : updatedData.startDate
               : null,
-            endDate: updatedData.endDate ? 
-              (typeof updatedData.endDate === 'object' ? updatedData.endDate.toISOString() : updatedData.endDate) 
-              : null
+            endDate: updatedData.endDate
+              ? typeof updatedData.endDate === 'object'
+                ? updatedData.endDate.toISOString()
+                : updatedData.endDate
+              : null,
+            projectCost: updatedData.projectCost,
+            projectManagerId: updatedData.projectManager?.userId ?? null, // Send only the userId
           };
+          console.log("Project Data: ",projectData)
       
-          // Make API request
           const response = await axios.put(
             `${import.meta.env.VITE_API_URL}/api/projects/edit/${projectId}`,
             projectData,
             {
-              headers: { 
+              headers: {
                 Authorization: `${sessionStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-              }
+                'Content-Type': 'application/json',
+              },
             }
           );
       
-          // Success handling
           console.log("Project updated successfully:", response.data);
-          
-          // You might want to add toast/notification here
-          
-          // Close modal and refresh data
+      
           onClose();
-          // If you have a refresh function passed as prop, call it
+      
           if (typeof onProjectUpdated === 'function') {
             onProjectUpdated();
           }
+      
         } catch (error) {
-          // Error handling
           console.error("Failed to update project:", error);
-          
-          // You might want to add toast/notification here
           const errorMessage = error.response?.data?.message || "Failed to update project";
-          // setError(errorMessage);
+          // Optionally show toast here
         } finally {
-          // Reset loading state
           setIsLoading(false);
         }
       };
+      
     return (
         <div className="w-full bg-white rounded-lg shadow-md p-6">
             {/* Header */}
@@ -298,7 +312,7 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                 </div>
 
                 {/* Team Members Table */}
-                <div className="border rounded overflow-hidden">
+                <div className="border rounded overflow-visible relative">
                     <table className="w-full">
                         <thead className="bg-gray-100">
                             <tr className="text-left">

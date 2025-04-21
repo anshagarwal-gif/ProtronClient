@@ -3,7 +3,8 @@ const Sidebar = ({ activeSection, setActiveSection, handleLogout }) => {
     
     return (
         <div className="sidebar-main flex flex-col h-screen bg-green-900 text-white w-72 py-4 overflow-auto">
-            <div className="px-4 mb-6 text-center border-b border-blue-300 pb-6">
+            <div className="px-4 mb-6 flex justify-center items-center gap-5 text-center border-b border-blue-300 pb-6">
+                <img src="./logo.png" className="h-10 w-10" alt="" srcset="" />
                 <span className="text-2xl font-medium">ABC INC</span>
             </div>
 
