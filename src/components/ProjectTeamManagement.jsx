@@ -5,9 +5,9 @@ import EditTeamMemberModal from './EditTeamMemberModal';
 
 // Import the AssignTeamMemberModal component
 import AssignTeamMemberModal from './AssignTeamMemberModal';
+import EditProjectModal from './EditProjectModal';
 
 const ProjectTeamManagement = ({ projectId, project, onClose }) => {
-    console.log(projectId)
     const [teamMembers, setTeamMembers] = useState([
 
     ]);
@@ -16,14 +16,17 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [actionsOpen, setActionsOpen] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [selectedProjectId, setSelectedProjectId] = useState(null)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false)
+    const [projectFormData, setProjectFormData] = useState({...project});
+    const [editProjectModalOpen, setEditProjectModalOpen] = useState(false)
     const [editingMember, setEditingMember] = useState(null);
 
     const fetchTeammates = async () => {
         try {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`, {
-                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+                headers: { Authorization: `${sessionStorage.getItem('token')}` }
             })
             console.log(res.data)
             setTeamMembers(res.data)
@@ -31,22 +34,6 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
             console.log({ message: error })
         }
     }
-    console.log(teamMembers)
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, {
-                    headers:{ Authorization: `${sessionStorage.getItem('token')}` }
-                })
-                setUsers(res.data)
-                console.log(res.data)
-            } catch (error) {
-                console.log({ message: error })
-            }
-        }
-
-        fetchUsers()
-    }, [])
 
     useEffect(() => {
         fetchTeammates()
@@ -61,7 +48,7 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
     const handleStatusChange = async (id, newStatus) => {
         setActionsOpen(!actionsOpen[id]);
         console.log("handle Status Change function is called");
-    
+
         try {
             // Corrected axios.patch with proper argument order
             await axios.patch(
@@ -76,9 +63,9 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                     }
                 }
             );
-            
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`,{
-                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`, {
+                headers: { Authorization: `${sessionStorage.getItem('token')}` }
             });
             setTeamMembers(response.data);
 
@@ -95,13 +82,13 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
             console.error("Failed to update status:", error);
         }
     };
-    
+
     const handleRemoveMember = async (id) => {
         setActionsOpen(!actionsOpen[id]);
         console.log("remove function is called")
         try {
-            const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/project-team/delete/${id}`,{
-                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/project-team/delete/${id}`, {
+                headers: { Authorization: `${sessionStorage.getItem('token')}` }
             });
             console.log("Deleted successfully:", response.data);
 
@@ -131,13 +118,13 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                 estimatedReleaseDate: memberData.releaseDate,
             };
             console.log("Request Body:", requestBody);
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/project-team/add`, requestBody,{
-                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/project-team/add`, requestBody, {
+                headers: { Authorization: `${sessionStorage.getItem('token')}` }
             });
 
             // 2. Refetch the updated team list
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`,{
-                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`, {
+                headers: { Authorization: `${sessionStorage.getItem('token')}` }
             });
             setTeamMembers(response.data);
         } catch (error) {
@@ -170,18 +157,17 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
 
     // Add the update function
     const handleUpdateMember = async (updatedData, id) => {
-        console.log("Updated Data:", updatedData)
 
         try {
             await axios.put(
                 `${import.meta.env.VITE_API_URL}/api/project-team/edit/${id}`,
-                updatedData,{
-                    headers:{ Authorization: `${sessionStorage.getItem('token')}` }
-                }
+                updatedData, {
+                headers: { Authorization: `${sessionStorage.getItem('token')}` }
+            }
             );
 
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`,{
-                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`, {
+                headers: { Authorization: `${sessionStorage.getItem('token')}` }
             });
             setTeamMembers(response.data);
 
@@ -200,7 +186,70 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
             console.error("Failed to update member details:", error);
         }
     };
-    console.log(project)
+    const handleEditProject = (projectId) => {
+        console.log(projectId)
+        setSelectedProjectId(projectId);
+        setEditProjectModalOpen(true);
+    };
+    const handleProjectUpdate = async (updatedData) => {
+        // Basic validation
+        if (!updatedData.projectName) {
+          // You might want to add toast/notification here
+          console.error("Project name is required");
+          return;
+        }
+      
+        // Show loading state (optional)
+        setIsLoading(true);
+      
+        try {
+          // Prepare the data for API
+          const projectData = {
+            ...updatedData,
+            // Convert dates to ISO strings if they aren't already
+            startDate: updatedData.startDate ? 
+              (typeof updatedData.startDate === 'object' ? updatedData.startDate.toISOString() : updatedData.startDate) 
+              : null,
+            endDate: updatedData.endDate ? 
+              (typeof updatedData.endDate === 'object' ? updatedData.endDate.toISOString() : updatedData.endDate) 
+              : null
+          };
+      
+          // Make API request
+          const response = await axios.put(
+            `${import.meta.env.VITE_API_URL}/api/projects/edit/${projectId}`,
+            projectData,
+            {
+              headers: { 
+                Authorization: `${sessionStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+      
+          // Success handling
+          console.log("Project updated successfully:", response.data);
+          
+          // You might want to add toast/notification here
+          
+          // Close modal and refresh data
+          onClose();
+          // If you have a refresh function passed as prop, call it
+          if (typeof onProjectUpdated === 'function') {
+            onProjectUpdated();
+          }
+        } catch (error) {
+          // Error handling
+          console.error("Failed to update project:", error);
+          
+          // You might want to add toast/notification here
+          const errorMessage = error.response?.data?.message || "Failed to update project";
+          // setError(errorMessage);
+        } finally {
+          // Reset loading state
+          setIsLoading(false);
+        }
+      };
     return (
         <div className="w-full bg-white rounded-lg shadow-md p-6">
             {/* Header */}
@@ -211,7 +260,7 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                     </div>
                     <h1 className="text-green-900 text-lg font-bold ">Manage Projects</h1>
                 </div>
-                <button className="bg-green-900 text-white px-4 py-1 rounded text-sm hover:bg-green-600">
+                <button onClick={()=>handleEditProject(projectId)} className="bg-green-900 text-white px-4 py-1 rounded text-sm hover:bg-green-600">
                     Edit
                 </button>
             </div>
@@ -224,7 +273,7 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                 </div>
                 <div>
                     <p className="text-gray-500 text-sm">PM Name: <span className="font-medium text-gray-700">{project.projectManager?.firstName}{" "}
-                    {project.projectManager?.lastName}</span></p>
+                        {project.projectManager?.lastName}</span></p>
                     <p className="text-gray-500 text-sm mt-2">Sponsor: <span className="font-medium text-gray-700">{project.tenent || "N/A"}</span></p>
                 </div>
                 <div>
@@ -382,9 +431,19 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
             {editingMember && (
                 <EditTeamMemberModal
                     isOpen={isEditModalOpen}
-                    onClose={() => {setIsEditModalOpen(false); setEditingMember(null);}}
+                    onClose={() => { setIsEditModalOpen(false); setEditingMember(null); }}
                     member={editingMember}
                     onUpdate={handleUpdateMember}
+                />
+            )}
+            {selectedProjectId && (
+                <EditProjectModal
+                    open={true}
+                    projectId={selectedProjectId}
+                    onClose={() => setSelectedProjectId(null)}
+                    onSubmit={(updatedData) => handleProjectUpdate(updatedData)}
+                    formData={projectFormData}
+                    setFormData={setProjectFormData} 
                 />
             )}
         </div>
