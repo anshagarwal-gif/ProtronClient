@@ -22,7 +22,9 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
 
     const fetchTeammates = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`)
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`, {
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            })
             console.log(res.data)
             setTeamMembers(res.data)
         } catch (error) {
@@ -33,7 +35,9 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`)
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, {
+                    headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+                })
                 setUsers(res.data)
                 console.log(res.data)
             } catch (error) {
@@ -72,15 +76,20 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                     }
                 }
             );
-    
-            // Update frontend state
-            setTeamMembers((prevMembers) =>
-                prevMembers.map((member) =>
-                    member.projectTeamId === id
-                        ? { ...member, status: newStatus }
-                        : member
-                )
-            );
+            
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`,{
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            });
+            setTeamMembers(response.data);
+
+            // // Update frontend state
+            // setTeamMembers((prevMembers) =>
+            //     prevMembers.map((member) =>
+            //         member.projectTeamId === id
+            //             ? { ...member, status: newStatus }
+            //             : member
+            //     )
+            // );
         } catch (error) {
             alert("Failed to update status");
             console.error("Failed to update status:", error);
@@ -127,7 +136,9 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
             });
 
             // 2. Refetch the updated team list
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`);
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`,{
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            });
             setTeamMembers(response.data);
         } catch (error) {
             alert("Failed to add member:", error);
@@ -169,14 +180,19 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                 }
             );
 
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/project-team/list/${projectId}`,{
+                headers:{ Authorization: `${sessionStorage.getItem('token')}` }
+            });
+            setTeamMembers(response.data);
+
             // Update local state
-            setTeamMembers(prevMembers =>
-                prevMembers.map(member =>
-                    member.projectTeamId === editingMember.projectTeamId
-                        ? { ...member, ...updatedData }
-                        : member
-                )
-            );
+            // setTeamMembers(prevMembers =>
+            //     prevMembers.map(member =>
+            //         member.projectTeamId === editingMember.projectTeamId
+            //             ? { ...member, ...updatedData }
+            //             : member
+            //     )
+            // );
 
             setIsEditModalOpen(false);
         } catch (error) {
