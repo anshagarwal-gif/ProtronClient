@@ -313,91 +313,96 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
 
                 {/* Team Members Table */}
                 <div className="border rounded overflow-visible relative">
-                    <table className="w-full">
-                        <thead className="bg-gray-100">
-                            <tr className="text-left">
-                                <th className="py-3 px-4 text-sm font-medium text-gray-600">#</th>
-                                <th className="py-3 px-4 text-sm font-medium text-gray-600">Name</th>
-                                <th className="py-3 px-4 text-sm font-medium text-gray-600">Emp-Code</th>
-                                <th className="py-3 px-4 text-sm font-medium text-gray-600">Email</th>
-                                <th className="py-3 px-4 text-sm font-medium text-gray-600">Cost</th>
-                                <th className="py-3 px-4 text-sm font-medium text-gray-600">Est.Release</th>
-                                <th className="py-3 px-4 text-sm font-medium text-gray-600">Status</th>
-                                <th className="py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {teamMembers.map((member, index) => (
-                                <tr key={index} className="border-t">
-                                    <td className="py-3 px-4">{index + 1}</td>
-                                    <td className="py-3 px-4 flex items-center">
-                                        {member.user.profilePhoto ? (
-                                            <img
-                                                src={member.user.profilePhoto}
-                                                alt={member.user.firstName + member.user.lastName}
-                                                className="w-8 h-8 rounded-full mr-2"
-                                            />
-                                        ) : (
-                                            <img
-                                                src={"/profilepic.jpg"}
-                                                alt="userprofile"
-                                                className="w-8 h-8 rounded-full mr-2"
-                                            />
-                                        )}
-                                        <span>{member.user.firstName + member.user.lastName}</span>
-                                    </td>
-                                    <td className="py-3 px-4">{member.empCode}</td>
-                                    <td className="py-3 px-4">{member.user.email}</td>
-                                    <td className="py-3 px-4">
-                                        {member.unit === "Rupees" ? "₹" : member.unit === "Dollar" ? "$" : ""} {member.pricing}
-                                    </td>
-                                    <td className="py-3 px-4">{member.estimatedReleaseDate}</td>
-                                    <td className="py-3 px-4">
-                                        <span className={`${getStatusColor(member.status)}`}>
-                                            {member.status}
-                                        </span>
-                                    </td>
-                                    <td className="py-3 px-4 relative">
-                                        <button
-                                            onClick={() => toggleActions(member.projectTeamId)}
-                                            className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm flex items-center"
-                                        >
-                                            Actions
-                                            <FiChevronDown size={14} className="ml-1" />
-                                        </button>
-
-                                        {actionsOpen[member.projectTeamId] && (
-                                            <div className="absolute right-4 mt-1 bg-white shadow-lg border rounded z-10 w-32">
-                                                <button
-                                                    onClick={() => handleEditMember(member)}
-                                                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handleStatusChange(
-                                                            member.projectTeamId,
-                                                            member.status === "hold" ? "active" : "hold"
-                                                        )
-                                                    }
-                                                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                                                >
-                                                    {member.status === "hold" ? "Activate" : "Hold"}
-                                                </button>
-                                                <button
-                                                    onClick={() => handleRemoveMember(member.projectTeamId)}
-                                                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 text-sm"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
-                                        )}
-                                    </td>
+                    {/* Responsive Table Wrapper */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[600px]">
+                            <thead className="bg-gray-100">
+                                <tr className="text-left">
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">#</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Name</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Emp-Code</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Email</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Cost</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Est.Release</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Status</th>
+                                    <th className="py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {teamMembers.map((member, index) => (
+                                    <tr key={index} className="border-t">
+                                        <td className="py-3 px-4">{index + 1}</td>
+                                        <td className="py-3 px-4 flex items-center">
+                                            {member.user.profilePhoto ? (
+                                                <img
+                                                    src={member.user.profilePhoto}
+                                                    alt={member.user.firstName + member.user.lastName}
+                                                    className="w-8 h-8 rounded-full mr-2"
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={"/profilepic.jpg"}
+                                                    alt="userprofile"
+                                                    className="w-8 h-8 rounded-full mr-2"
+                                                />
+                                            )}
+                                            <span>{member.user.firstName + member.user.lastName}</span>
+                                        </td>
+                                        <td className="py-3 px-4">{member.empCode}</td>
+                                        <td className="py-3 px-4">{member.user.email}</td>
+                                        <td className="py-3 px-4">
+                                            {member.unit === "Rupees" ? "₹" : member.unit === "Dollar" ? "$" : ""} {member.pricing}
+                                        </td>
+                                        <td className="py-3 px-4">{member.estimatedReleaseDate}</td>
+                                        <td className="py-3 px-4">
+                                            <span className={`${getStatusColor(member.status)}`}>
+                                                {member.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 px-4 relative">
+                                            <button
+                                                onClick={() => toggleActions(member.projectTeamId)}
+                                                className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm flex items-center"
+                                            >
+                                                Actions
+                                                <FiChevronDown size={14} className="ml-1" />
+                                            </button>
+
+                                            {actionsOpen[member.projectTeamId] && (
+                                                <div
+                                                    className="absolute right-4 mt-1 bg-white shadow-lg border rounded z-50 w-32" // Increased z-index to 50
+                                                >
+                                                    <button
+                                                        onClick={() => handleEditMember(member)}
+                                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleStatusChange(
+                                                                member.projectTeamId,
+                                                                member.status === "hold" ? "active" : "hold"
+                                                            )
+                                                        }
+                                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                                    >
+                                                        {member.status === "hold" ? "Activate" : "Hold"}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRemoveMember(member.projectTeamId)}
+                                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 text-sm"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {/* Pagination */}
                     <div className="bg-gray-50 py-3 px-4 flex justify-between items-center border-t">

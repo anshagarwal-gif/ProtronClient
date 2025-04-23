@@ -258,17 +258,17 @@ const ProjectManagement = () => {
                 <h2>| Manage Projects</h2>
               </div>
       
-              <div className="flex justify-between items-center mt-5">
-                <h1>Project List</h1>
-                <div className="flex gap-4">
+              <div className="flex flex-col md:flex-row justify-between items-center mt-5 space-y-4 md:space-y-0">
+                <h1 className="text-lg font-semibold">Project List</h1>
+                <div className="flex flex-col md:flex-row lg:flex-row gap-4 space-y-2 md:space-y-0 w-full md:w-auto">
                   {/* Search Input */}
-                  <div className="relative">
+                  <div className="relative w-full md:w-auto">
                     <input
                       type="text"
                       placeholder="Search by project name..."
                       value={searchTerm}
                       onChange={handleSearchChange}
-                      className="border rounded px-3 py-2 pl-9"
+                      className="border rounded px-3 py-2 pl-9 w-full md:w-auto"
                     />
                     <AiOutlineSearch className="absolute left-3 top-3 text-gray-400" />
                   </div>
@@ -277,12 +277,12 @@ const ProjectManagement = () => {
                     className={`border px-4 py-2 rounded hover:bg-green-600 ${groupByDate ? 'bg-green-900 text-white' : 'bg-gray-200'}`}
                     onClick={toggleGroupByDate}
                   >
-                    <AiOutlineCalendar className="inline mr-1 " /> 
+                    <AiOutlineCalendar className="inline mr-1" />
                     {groupByDate ? 'Grouped by Date' : 'List View'}
                   </button>
                   {/* Sort order toggle */}
                   <button
-                    className="border px-4 py-2 rounded bg-gray-200"
+                    className="border px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
                     onClick={handleToggleSortOrder}
                   >
                     Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
@@ -303,8 +303,8 @@ const ProjectManagement = () => {
                     <AiOutlineCalendar className="inline mr-2" />
                     {date === "All Projects" ? "All Projects" : `Projects for ${date}`}
                   </h2>
-                  <div className="border rounded overflow-hidden">
-                    <table className="w-full">
+                  <div className="border rounded overflow-x-auto">
+                    <table className="w-full min-w-[600px]">
                       <thead className="bg-gray-100">
                         <tr className="text-left">
                           <th className="py-3 px-4">#</th>
