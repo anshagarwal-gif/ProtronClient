@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FiHome, FiUser, FiUserCheck, FiFolder, FiClock, FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import { FiHome, FiUser, FiUserCheck, FiFolder, FiClock, FiLogOut, FiMenu } from "react-icons/fi";
 
 const Sidebar = ({ activeSection, setActiveSection, handleLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,15 +48,6 @@ const Sidebar = ({ activeSection, setActiveSection, handleLogout }) => {
 
   return (
     <>
-      {/* Hamburger Menu Button - Fixed position */}
-      <button 
-        className="hamburger-button fixed top-4 left-4 z-30 md:hidden bg-green-900 text-white p-2 rounded-md shadow-md"
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-      </button>
-
       {/* Overlay for mobile */}
       {isMobile && isOpen && (
         <div className="fixed inset-0 bg-transparent bg-opacity-50 z-20" onClick={() => setIsOpen(false)} />
@@ -109,6 +100,18 @@ const Sidebar = ({ activeSection, setActiveSection, handleLogout }) => {
           </button>
         </div>
       </div>
+
+      {/* Hamburger Menu Button - Moved under sidebar in the DOM structure */}
+      {isMobile && !isOpen && (
+  <button 
+    className="hamburger-button fixed top-4 left-4 z-30 md:hidden bg-green-900 text-white p-2 rounded-md shadow-md"
+    onClick={toggleSidebar}
+    aria-label="Toggle menu"
+  >
+    <FiMenu size={24} />
+  </button>
+)}
+
 
       {/* Content padding for mobile when sidebar is hidden */}
       {isMobile && (
