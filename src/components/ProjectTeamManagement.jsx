@@ -360,44 +360,49 @@ const ProjectTeamManagement = ({ projectId, project, onClose }) => {
                                             </span>
                                         </td>
                                         <td className="py-3 px-4 relative">
-                                            <button
-                                                onClick={() => toggleActions(member.projectTeamId)}
-                                                className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm flex items-center"
-                                            >
-                                                Actions
-                                                <FiChevronDown size={14} className="ml-1" />
-                                            </button>
+    <button
+        onClick={() => toggleActions(member.projectTeamId)}
+        className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm flex items-center"
+    >
+        Actions
+        <FiChevronDown size={14} className="ml-1" />
+    </button>
 
-                                            {actionsOpen[member.projectTeamId] && (
-                                                <div
-                                                    className="absolute right-4 mt-1 bg-white shadow-lg border rounded z-50 w-32" // Increased z-index to 50
-                                                >
-                                                    <button
-                                                        onClick={() => handleEditMember(member)}
-                                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() =>
-                                                            handleStatusChange(
-                                                                member.projectTeamId,
-                                                                member.status === "hold" ? "active" : "hold"
-                                                            )
-                                                        }
-                                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                                                    >
-                                                        {member.status === "hold" ? "Activate" : "Hold"}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleRemoveMember(member.projectTeamId)}
-                                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 text-sm"
-                                                    >
-                                                        Remove
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </td>
+    {actionsOpen[member.projectTeamId] && (
+        <div
+            className="fixed bg-white shadow-lg border rounded z-[9999] w-32"
+            style={{
+                // Position based on the button's location
+                left: window.event ? window.event.target.getBoundingClientRect().left : 'auto',
+                top: window.event ? window.event.target.getBoundingClientRect().bottom + window.scrollY : 'auto',
+            }}
+        >
+            <button
+                onClick={() => handleEditMember(member)}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+            >
+                Edit
+            </button>
+            <button
+                onClick={() =>
+                    handleStatusChange(
+                        member.projectTeamId,
+                        member.status === "hold" ? "active" : "hold"
+                    )
+                }
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+            >
+                {member.status === "hold" ? "Activate" : "Hold"}
+            </button>
+            <button
+                onClick={() => handleRemoveMember(member.projectTeamId)}
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 text-sm"
+            >
+                Remove
+            </button>
+        </div>
+    )}
+</td>
                                     </tr>
                                 ))}
                             </tbody>

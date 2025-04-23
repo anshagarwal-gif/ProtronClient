@@ -59,7 +59,7 @@ const Sidebar = ({ activeSection, setActiveSection, handleLogout }) => {
 
       {/* Overlay for mobile */}
       {isMobile && isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={() => setIsOpen(false)} />
+        <div className="fixed inset-0 bg-transparent bg-opacity-50 z-20" onClick={() => setIsOpen(false)} />
       )}
 
       {/* Sidebar */}
